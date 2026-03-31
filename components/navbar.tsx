@@ -1,4 +1,5 @@
 "use client"
+import Image from "next/image"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -15,11 +16,14 @@ export function Navbar({ className }: { className?: string }) {
             className="inline-block size-2 rounded-full"
             style={{ backgroundColor: "var(--color-brand)" }}
           />
-          <img src="/logo.png" alt="logo" className="w-10 h-10" />
+          <Image src="/logo.png" alt="Torus logo" width={40} height={40} className="w-10 h-10" />
           <span className="text-muted-foreground tracking-tight text-lg font-semibold">Torus Protocol</span>
         </Link>
 
         <nav className="hidden md:flex items-center gap-6 text-base text-muted-foreground">
+          <Link href="/docs" className="hover:text-foreground transition-colors">
+            Docs
+          </Link>
           <Link href="/explore" className="hover:text-foreground transition-colors">
             Explore
           </Link>

@@ -1,7 +1,6 @@
-import { createPublicClient, http, parseEther } from 'viem'
+import { createPublicClient, http } from 'viem'
 import { sepolia } from 'viem/chains'
 
-// U2U Solaris chain configuration
 const u2uSolaris = {
   id: 39,
   name: 'U2U Solaris Mainnet',
@@ -25,9 +24,13 @@ const u2uSolaris = {
   testnet: false,
 }
 
+type VerificationReceipt = Awaited<
+  ReturnType<ReturnType<typeof createPublicClient>['waitForTransactionReceipt']>
+>
+
 export interface TransactionVerificationResult {
   success: boolean
-  receipt?: any
+  receipt?: VerificationReceipt
   error?: string
   confirmations?: number
 }
@@ -39,116 +42,108 @@ export interface TransactionVerificationOptions {
   timeoutMs?: number
 }
 
-/**
- * Verifies a transaction by checking its status and confirmations
- */
 export async function verifyTransaction({
   hash,
   chainId,
   requiredConfirmations = 1,
-  timeoutMs = 60000 // 60 seconds timeout
+  timeoutMs = 60000,
 }: TransactionVerificationOptions): Promise<TransactionVerificationResult> {
   try {
-    // Create the appropriate client based on chain
     const client = createPublicClient({
       chain: chainId === 11155111 ? sepolia : u2uSolaris,
-      transport: http()
+      transport: http(),
     })
 
-    console.log(`🔍 Verifying transaction ${hash} on chain ${chainId}...`)
+    console.log(`Verifying transaction ${hash} on chain ${chainId}...`)
 
-    // Wait for transaction receipt with timeout
-    const receipt = await Promise.race([
+    const receipt: VerificationReceipt = await Promise.race([
       client.waitForTransactionReceipt({
         hash: hash as `0x${string}`,
         confirmations: requiredConfirmations,
-        timeout: timeoutMs
+        timeout: timeoutMs,
       }),
-      new Promise((_, reject) => 
+      new Promise<never>((_, reject) =>
         setTimeout(() => reject(new Error('Transaction verification timeout')), timeoutMs)
-      )
-    ]) as any
+      ),
+    ])
 
     if (!receipt) {
       return {
         success: false,
-        error: 'No receipt received'
+        error: 'No receipt received',
       }
     }
 
-    // Check if transaction was successful
     if (receipt.status !== 'success') {
       return {
         success: false,
         error: 'Transaction failed on-chain',
-        receipt
+        receipt,
       }
     }
 
-    console.log(`✅ Transaction ${hash} verified successfully with ${receipt.confirmations || 1} confirmations`)
+    console.log(
+      `Transaction ${hash} verified successfully with ${requiredConfirmations} confirmations`
+    )
 
     return {
       success: true,
       receipt,
-      confirmations: receipt.confirmations || 1
+      confirmations: requiredConfirmations,
     }
-
   } catch (error) {
-    console.error(`❌ Transaction verification failed for ${hash}:`, error)
-    
+    console.error(`Transaction verification failed for ${hash}:`, error)
+
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Unknown verification error'
+      error: error instanceof Error ? error.message : 'Unknown verification error',
     }
   }
 }
 
-/**
- * Gets transaction details from blockchain
- */
 export async function getTransactionDetails(hash: string, chainId: number) {
   try {
     const client = createPublicClient({
       chain: chainId === 11155111 ? sepolia : u2uSolaris,
-      transport: http()
+      transport: http(),
     })
 
     const tx = await client.getTransaction({
-      hash: hash as `0x${string}`
+      hash: hash as `0x${string}`,
     })
 
     return {
       success: true,
-      transaction: tx
+      transaction: tx,
     }
   } catch (error) {
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Failed to get transaction details'
+      error: error instanceof Error ? error.message : 'Failed to get transaction details',
     }
   }
 }
 
-/**
- * Gets the explorer URL for a transaction
- */
 export function getExplorerUrl(hash: string, chainId: number): string {
   if (chainId === 11155111) {
     return `https://sepolia.etherscan.io/tx/${hash}`
-  } else if (chainId === 39) {
+  }
+
+  if (chainId === 39) {
     return `https://u2uscan.xyz/tx/${hash}`
   }
+
   return ''
 }
 
-/**
- * Gets the chain name for display
- */
 export function getChainDisplayName(chainId: number): string {
   if (chainId === 11155111) {
     return 'Sepolia Testnet'
-  } else if (chainId === 39) {
+  }
+
+  if (chainId === 39) {
     return 'U2U Solaris Mainnet'
   }
+
   return `Chain ${chainId}`
 }

@@ -9,7 +9,10 @@ import "./globals.css"
 
 export const metadata: Metadata = {
   title: "Torus",
-  description: "swap like its cool",
+  description: "Every stablecoin finds its orbit.",
+  icons: {
+    icon: "/logo.png",
+  },
 }
 
 export default function RootLayout({
