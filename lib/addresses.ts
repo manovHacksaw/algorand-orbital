@@ -1,0 +1,4 @@
+// ETH ⇄ U2U Bridge Contract Addresses
+export const SEPOLIA_BRIDGE_ADDRESS = "0xe564df234366234b279c9a5d547c94AA4a5C08F3"; // Deployed on Sepolia
+export const U2U_BRIDGE_ADDRESS = "0x20c452438968C942729D70035fF2dD86481F6EaB"; // Deployed on U2U
+export const WETH_U2U_ADDRESS = "0x3BfA22D8b5fD0f63E96425717BC58910F4F7DD6D"; // WETH deployed on U2U
