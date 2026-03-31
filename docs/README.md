@@ -1,4 +1,4 @@
-# Orbital AMM on Algorand
+# Torus Protocol: Orbital AMM on Algorand
 
 > **Multi-stablecoin AMM with concentrated liquidity for the Algorand ecosystem**
 
